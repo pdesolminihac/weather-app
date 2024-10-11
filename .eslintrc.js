@@ -1,15 +1,11 @@
 module.exports = {
-  parser: "vue-eslint-parser",
+  env: {
+    node: true,
+  },
   parserOptions: {
     parser: "@babel/eslint-parser",
     requireConfigFile: false,
-    ecmaVersion: 2020,
-    sourceType: "module",
   },
-  extends: [
-    "plugin:vue/vue3-essential",
-    "eslint:recommended",
-    "@vue/eslint-config-standard",
-  ],
+  extends: ["plugin:vue/essential", "eslint:recommended"],
   plugins: ["vue"],
 };
