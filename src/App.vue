@@ -20,7 +20,6 @@
       @selectCity="selectCity"
     />
 
-    <!-- Loading Indicator -->
     <div v-if="loading" class="flex flex-col mt-5 items-center">
       <p class="w-full text-center text-white">
         Fetching weather data for {{ selectedCity.cityName }}...
@@ -30,16 +29,17 @@
       </div>
     </div>
 
-    <!-- Error Message -->
-    <div v-if="errorMessage" class="text-red mt-5">{{ errorMessage }}</div>
+    <div v-if="errorMessage" class="text-white mt-5 text-center">
+      {{ errorMessage }}
+    </div>
 
     <HourlyWeather
-      v-if="!loading && hourlyWeather.length"
+      v-if="!loading && !errorMessage && hourlyWeather.length"
       :hourlyWeather="hourlyWeather"
     />
 
     <DailyWeather
-      v-if="!loading && dailyWeather.length"
+      v-if="!loading && !errorMessage && dailyWeather.length"
       :dailyWeather="dailyWeather"
     />
 
