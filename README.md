@@ -11,6 +11,7 @@ Simple weather app to check weather forecast in the following hours and days for
 - A debounce function is used to avoid making too many requests to the API
 - A cache is used to store the weather forecast for a specific location for 10 minutes
 - The app is responsive and works well on mobile devices
+- There is a search bar to search for a specific location using the city meta data from https://www.weatherbit.io/api/meta as a source
 
 ## Project setup
 
