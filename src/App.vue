@@ -14,28 +14,11 @@
 
     <SearchBar v-if="showSearchBar" :cities="cities" @selectCity="selectCity" />
 
-    <div class="flex bg-white justify-start overflow-x-auto">
-      <button
-        v-for="city in defaultCities"
-        :key="city.cityName"
-        @click="debouncedFetchWeather(city)"
-        :class="{ active: city.cityName === selectedCity.cityName }"
-        class="p-4 m-0 uppercase text-gray-500 font-medium"
-      >
-        {{ city.cityName }}
-      </button>
-      <button
-        v-if="
-          !defaultCities.some((city) => city.cityName === selectedCity.cityName)
-        "
-        :key="selectedCity.cityName"
-        @click="debouncedFetchWeather(selectedCity)"
-        :class="{ active: !(selectedCity in defaultCities) }"
-        class="p-4 m-0 uppercase text-gray-500 font-medium"
-      >
-        {{ selectedCity.cityName }}
-      </button>
-    </div>
+    <CitiesBar
+      :defaultCities="defaultCities"
+      :selectedCity="selectedCity"
+      @selectCity="selectCity"
+    />
 
     <!-- Loading Indicator -->
     <div v-if="loading" class="flex flex-col mt-5 items-center">
@@ -75,6 +58,7 @@ import { getWeatherByCoordinates } from "./services/weatherService";
 import HourlyWeather from "./components/HourlyWeather.vue";
 import DailyWeather from "./components/DailyWeather.vue";
 import SearchBar from "./components/SearchBar.vue";
+import CitiesBar from "./components/CitiesBar.vue";
 import debounce from "lodash.debounce";
 import Papa from "papaparse";
 import rawCities from "!!raw-loader!./assets/cities.csv";
@@ -90,10 +74,11 @@ export default {
     HourlyWeather,
     DailyWeather,
     SearchBar,
+    CitiesBar,
   },
   data() {
     return {
-      selectedCity: "",
+      selectedCity: {},
       hourlyWeather: [],
       dailyWeather: [],
       loading: false,
@@ -107,7 +92,6 @@ export default {
   methods: {
     async fetchWeather({ cityName, lat, lon }) {
       try {
-        this.selectedCity = { cityName, lat, lon };
         this.errorMessage = null;
         this.loading = true;
         const data = await getWeatherByCoordinates(cityName, lat, lon);
@@ -159,7 +143,7 @@ export default {
     },
 
     selectCity(city) {
-      this.fetchWeather(city);
+      this.debouncedFetchWeather(city);
       this.selectedCity = city;
       this.showSearchBar = false;
     },
@@ -171,10 +155,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-button.active {
-  border-bottom: 2px solid red;
-  color: black;
-}
-</style>
