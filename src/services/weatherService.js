@@ -25,7 +25,6 @@ async function getCachedWeatherData(cityName) {
 export async function getWeatherByCoordinates(cityName, lat, lon) {
   const cachedData = await getCachedWeatherData(cityName);
   if (cachedData) {
-    console.log("Using cached weather data for", cityName);
     return cachedData;
   }
 

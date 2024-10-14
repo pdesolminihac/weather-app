@@ -30,23 +30,23 @@
 </template>
 
 <script>
-import { formatTemp, getIconUrl } from '../utils'
+import { formatTemp, getIconUrl } from "../utils";
 
 export default {
-  props: ['hourlyWeather', 'cityName'],
+  props: ["hourlyWeather"],
   methods: {
-    formatHour (timestamp) {
-      const date = new Date(timestamp * 1000)
+    formatHour(timestamp) {
+      const date = new Date(timestamp * 1000);
       return date.toLocaleTimeString([], {
-        hour: 'numeric',
-        minute: '2-digit'
-      })
+        hour: "numeric",
+        minute: "2-digit",
+      });
     },
-    formatPercent (percent) {
-      return (percent * 100).toFixed(0) + '%'
+    formatPercent(percent) {
+      return (percent * 100).toFixed(0) + "%";
     },
     formatTemp,
-    getIconUrl
-  }
-}
+    getIconUrl,
+  },
+};
 </script>

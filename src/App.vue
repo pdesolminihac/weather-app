@@ -1,27 +1,46 @@
 <template>
   <div
-    class="weather-app bg-gradient-to-b from-blue-600 to-blue-200 min-h-screen flex flex-col"
+    class="bg-gradient-to-b from-blue-600 to-blue-200 min-h-screen flex flex-col"
   >
-    <div class="p-5 bg-blue-600">
+    <div class="p-5 bg-blue-600 flex-row flex justify-between w-full">
       <h1 class="text-2xl text-white">Simple Weather</h1>
+      <img
+        src="./assets/magnifying-glass.png"
+        alt="Search"
+        class="w-7 h-7 cursor-pointer"
+        @click="toggleSearchBar"
+      />
     </div>
 
-    <div class="flex bg-white justify-start">
+    <SearchBar v-if="showSearchBar" :cities="cities" @selectCity="selectCity" />
+
+    <div class="flex bg-white justify-start overflow-x-auto">
       <button
         v-for="city in defaultCities"
         :key="city.cityName"
         @click="debouncedFetchWeather(city)"
-        :class="{ active: city.cityName === cityName }"
+        :class="{ active: city.cityName === selectedCity.cityName }"
         class="p-4 m-0 uppercase text-gray-500 font-medium"
       >
         {{ city.cityName }}
+      </button>
+      <button
+        v-if="
+          !defaultCities.some((city) => city.cityName === selectedCity.cityName)
+        "
+        :key="selectedCity.cityName"
+        @click="debouncedFetchWeather(selectedCity)"
+        :class="{ active: !(selectedCity in defaultCities) }"
+        class="p-4 m-0 uppercase text-gray-500 font-medium"
+      >
+        {{ selectedCity.cityName }}
       </button>
     </div>
 
     <!-- Loading Indicator -->
     <div v-if="loading" class="flex flex-col mt-5 items-center">
       <p class="w-full text-center text-white">
-        Fetching weather data for {{ cityName }}...
+        Fetching weather data for {{ selectedCity.cityName }}...
       </p>
       <div class="w-full flex justify-center">
         <img src="./assets/loading.gif" alt="Loading..." class="w-24 h-24" />
@@ -34,17 +53,15 @@
     <HourlyWeather
       v-if="!loading && hourlyWeather.length"
       :hourlyWeather="hourlyWeather"
-      :cityName="cityName"
     />
 
     <DailyWeather
       v-if="!loading && dailyWeather.length"
       :dailyWeather="dailyWeather"
-      :cityName="cityName"
     />
 
     <div
-      class="bottom-bar bg-blue-600 text-white text-right fixed bottom-0 left-0 right-0"
+      class="bg-blue-600 text-white text-right fixed bottom-0 left-0 right-0"
     >
       <p v-if="lastUpdated">
         Last updated: {{ formatLastUpdated(lastUpdated) }}
@@ -57,7 +74,10 @@
 import { getWeatherByCoordinates } from "./services/weatherService";
 import HourlyWeather from "./components/HourlyWeather.vue";
 import DailyWeather from "./components/DailyWeather.vue";
+import SearchBar from "./components/SearchBar.vue";
 import debounce from "lodash.debounce";
+import Papa from "papaparse";
+import rawCities from "!!raw-loader!./assets/cities.csv";
 
 const defaultCities = [
   { cityName: "Rio de Janeiro", lat: "-22.9068", lon: "-43.1729" },
@@ -69,22 +89,25 @@ export default {
   components: {
     HourlyWeather,
     DailyWeather,
+    SearchBar,
   },
   data() {
     return {
-      cityName: "",
+      selectedCity: "",
       hourlyWeather: [],
       dailyWeather: [],
       loading: false,
       errorMessage: "",
       defaultCities,
       lastUpdated: null,
+      showSearchBar: false,
+      cities: [],
     };
   },
   methods: {
     async fetchWeather({ cityName, lat, lon }) {
       try {
-        this.cityName = cityName;
+        this.selectedCity = { cityName, lat, lon };
         this.errorMessage = null;
         this.loading = true;
         const data = await getWeatherByCoordinates(cityName, lat, lon);
@@ -112,10 +135,39 @@ export default {
         options
       )} ${date.toLocaleTimeString("en-US", timeOptions)}`;
     },
+
+    toggleSearchBar() {
+      this.showSearchBar = !this.showSearchBar;
+    },
+
+    loadCities() {
+      Papa.parse(rawCities, {
+        header: true,
+        complete: (results) => {
+          this.cities = results.data.map((city) => {
+            return {
+              cityName: city.city_name,
+              lat: city.lat,
+              lon: city.lon,
+            };
+          });
+        },
+        error: (error) => {
+          console.error("Error loading cities:", error);
+        },
+      });
+    },
+
+    selectCity(city) {
+      this.fetchWeather(city);
+      this.selectedCity = city;
+      this.showSearchBar = false;
+    },
   },
   mounted() {
     this.fetchWeather(defaultCities[0]);
-    this.cityName = defaultCities[0].cityName;
+    this.selectCity(defaultCities[0]);
+    this.loadCities();
   },
 };
 </script>

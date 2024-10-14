@@ -35,7 +35,7 @@
 import { formatTemp, getIconUrl } from "../utils";
 
 export default {
-  props: ["dailyWeather", "cityName"],
+  props: ["dailyWeather"],
   methods: {
     formatDate(timestamp) {
       const date = new Date(timestamp * 1000);
