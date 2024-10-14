@@ -149,7 +149,7 @@ export default {
     },
   },
   mounted() {
-    this.fetchWeather(defaultCities[0]);
+    this.debouncedFetchWeather(defaultCities[0]);
     this.selectCity(defaultCities[0]);
     this.loadCities();
   },
